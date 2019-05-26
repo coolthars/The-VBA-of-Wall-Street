@@ -1,0 +1,126 @@
+Sub Dosomething()
+    Dim xSh As Worksheet
+    Application.ScreenUpdating = False
+    For Each xSh In Worksheets
+        xSh.Select
+        Call RunCode
+    Next
+    Application.ScreenUpdating = True
+End Sub
+Sub RunCode()
+Dim Ticker As String
+Dim NextTicker As String
+Dim Row As Long
+Dim LastRow As Long
+Dim TotalStockVolume As Double
+Dim CurrentTotalRow As Integer
+Dim OpeningPrice As Double
+Dim ClosingPrice As Double
+Dim gsv As Double
+Dim max As Double
+Dim min As Double
+Dim x As Integer
+Dim row_max_id As Integer
+Dim row_min_id As Integer
+Dim row_gsv_id As Integer
+
+
+Dim PercentageChange As Double
+max = Cells(2, 11).Value
+min = max
+gsv = Cells(2, 12).Value
+
+PercentageChange = 0
+
+OpeningPrice = Cells(2, 3).Value
+
+TotalStockVolume = 0
+LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+CurrentTotalRow = 2
+Cells(1, 9).Value = "Ticker"
+Cells(1, 10).Value = "Yearly Change"
+Cells(1, 11).Value = "Percentage Change"
+Cells(1, 12).Value = "Total StockVolume"
+Cells(2, 14).Value = " Greatest Percentage increase"
+Cells(3, 14).Value = "Greatest Percentage decrease"
+Cells(4, 14).Value = "Greatest Stock Value"
+
+For Row = 2 To LastRow
+Ticker = Cells(Row, 1).Value
+NextTicker = Cells(Row + 1, 1).Value
+TotalStockVolume = TotalStockVolume + Cells(Row, 7).Value
+If (Ticker <> NextTicker) Then
+ Cells(CurrentTotalRow, 9).Value = Ticker
+ Cells(CurrentTotalRow, 12).Value = TotalStockVolume
+ YearlyChange = Cells(Row, 6).Value - OpeningPrice
+Cells(CurrentTotalRow, 10).Value = YearlyChange
+If OpeningPrice = 0 Then
+ MsgBox ("OpeningPrice is zero for row=" + Str(Row))
+ Cells(CurrentTotalRow, 11).Value = "error"
+Else
+ PercentageChange = (YearlyChange / OpeningPrice)
+ Cells(CurrentTotalRow, 11).Value = PercentageChange
+ Cells(CurrentTotalRow, 11).NumberFormat = "0.00%"
+End If
+'Conditional formatting
+
+If Cells(CurrentTotalRow, 10).Value < 0 Then
+   Cells(CurrentTotalRow, 10).Interior.Color = RGB(255, 0, 0)
+   Else
+   Cells(CurrentTotalRow, 10).Interior.Color = RGB(0, 255, 0)
+   End If
+
+OpeningPrice = Cells(Row + 1, 3).Value
+
+TotalStockVolume = 0
+CurrentTotalRow = CurrentTotalRow + 1
+End If
+Next
+
+row_min_id = 2
+row_max_id = 2
+row_gsv_id = 2
+
+For x = 2 To CurrentTotalRow
+
+If (Cells(x, 11).Value <> "error") Then
+ If (max < Cells(x, 11).Value) Then
+  max = Cells(x, 11).Value
+  row_max_id = x
+   End If
+ If (min > Cells(x, 11).Value) Then
+  min = Cells(x, 11).Value
+  row_min_id = x
+  
+ End If
+End If
+
+If (gsv < Cells(x, 12).Value) Then
+ gsv = Cells(x, 12).Value
+ row_gsv_id = x
+End If
+'debug print statements
+'Cells(x, 20).Value = max
+'Cells(x, 21).Value = min
+'Cells(x, 22).Value = gsv
+
+
+Next
+Cells(1, 15).Value = "Ticker"
+Cells(1, 16).Value = "value"
+Cells(2, 16).Value = max
+Cells(3, 16).Value = min
+Cells(4, 16).Value = gsv
+Cells(2, 16).NumberFormat = "0.00%"
+Cells(3, 16).NumberFormat = "0.00%"
+Cells(2, 15).Value = Cells(row_max_id, 9).Value
+Cells(3, 15).Value = Cells(row_min_id, 9).Value
+Cells(4, 15).Value = Cells(row_gsv_id, 9).Value
+
+
+
+End Sub
+
+
+
+
